@@ -17,7 +17,7 @@ class ReaderSceneState extends State<ReaderScene> with RouteAware {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.green,
+        color: Colors.yellow,
       ),
     );
   }
