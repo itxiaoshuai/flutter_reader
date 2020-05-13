@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+import 'package:epub/epub.dart';
 import 'package:flutter/material.dart';
 
-import 'app_navigator.dart';
+import 'package:flutter/services.dart';
+import 'package:flutterreader/app_navigator.dart';
 
 void main() => runApp(App());
 
@@ -18,7 +21,34 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+EpubBook epubBook;
+
 class _HomePageState extends State<HomePage> {
+  static Future<bool> fetch() async {
+    ByteData imageData = await rootBundle.load('assets/test.epub');
+    List<int> bytes = Uint8List.view(imageData.buffer);
+
+    epubBook = await EpubReader.readBook(bytes);
+    String title = epubBook.Title;
+    String author = epubBook.Author;
+    List<String> authors = epubBook.AuthorList;
+
+    epubBook.Chapters.forEach((EpubChapter chapter) {
+      // Title of chapter
+      String chapterTitle = chapter.Title;
+
+      // HTML content of current chapter
+      String chapterHtmlContent = chapter.HtmlContent;
+//      print(chapterHtmlContent);
+      // Nested chapters
+      List<EpubChapter> subChapters = chapter.SubChapters;
+    });
+    EpubContent bookContent = epubBook.Content;
+//    print(title);
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,16 +58,29 @@ class _HomePageState extends State<HomePage> {
           onTap: () {
             AppNavigator.pushReader(context, 1);
           },
+//          onTap: () async {
+//            Future f1 = Future(() => fetch());
+//
+//            f1.then((_) => setState(() {}));
+//            // f2 then 异步回调里面还有异步回调
+//          },
           child: Container(
-            height: 40,
-            decoration: BoxDecoration(
-                color: Color(0xFF23B38E),
-                borderRadius: BorderRadius.circular(5)),
-            child: Center(
-              child: Text(
-                '开始阅读',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
+            child: Column(
+              children: [
+                Text(epubBook == null ? "" : epubBook.Title),
+                Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                      color: Color(0xFF23B38E),
+                      borderRadius: BorderRadius.circular(5)),
+                  child: Center(
+                    child: Text(
+                      '开始阅读',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                )
+              ],
             ),
           ),
         ),
