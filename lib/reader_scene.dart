@@ -27,12 +27,6 @@ class ReaderScene extends StatefulWidget {
 class ReaderSceneState extends State<ReaderScene>
     with TickerProviderStateMixin {
   PageController pageController = PageController(keepPage: false);
-  double _topHeight = 0;
-  double _bottomViewHeight = 0;
-  int _duration = 200;
-
-  double progressValue;
-  bool isTipVisible = false;
 
   AnimationController animationController;
   Animation<double> animation;
@@ -80,16 +74,6 @@ class ReaderSceneState extends State<ReaderScene>
     );
   }
 
-  hide() {
-    animationController.reverse();
-    Timer(Duration(milliseconds: 200), () {
-      this.widget.onTap();
-    });
-    setState(() {
-      isTipVisible = false;
-    });
-  }
-
   buildBottomView() {
     return Positioned(
       bottom: -(Screen.bottomSafeHeight + 110) * (1 - animation.value),
@@ -98,6 +82,7 @@ class ReaderSceneState extends State<ReaderScene>
       child: Column(
         children: <Widget>[
           Container(
+            color: MyColors.contentBgColor,
             padding: EdgeInsets.only(bottom: Screen.bottomSafeHeight),
             child: Column(
               children: <Widget>[
@@ -106,31 +91,6 @@ class ReaderSceneState extends State<ReaderScene>
             ),
           )
         ],
-      ),
-    );
-  }
-
-  Widget buildReadBottomView() {
-    return AnimatedContainer(
-      height: _bottomViewHeight,
-      duration: Duration(milliseconds: _duration),
-      child: Container(
-        height: Dimens.readBottomHeight,
-        color: MyColors.contentBgColor,
-        child: Column(
-          children: [
-            Row(
-              children: <Widget>[
-                Container(
-                  color: Colors.blue,
-                  height: 200,
-                  child: Text('xxxxxx'),
-                ),
-              ],
-            ),
-          ],
-        ),
-//        child: buildBottomMenus(),
       ),
     );
   }
@@ -156,6 +116,7 @@ class ReaderSceneState extends State<ReaderScene>
           padding:
               EdgeInsets.fromLTRB(Dimens.leftMargin, 0, Dimens.rightMargin, 0),
           child: Container(
+            width: 60,
             color: Colors.blue,
             padding: EdgeInsets.symmetric(vertical: 7),
             child: Column(
@@ -177,140 +138,96 @@ class ReaderSceneState extends State<ReaderScene>
   }
 
   Widget buildReadTopView() {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: _duration),
-      height: _topHeight,
-      child: Container(
-        height: Dimens.titleHeight,
-        color: MyColors.contentBgColor,
-        child: Row(
+    return Positioned(
+        top: -Screen.navigationBarHeight * (1 - animation.value),
+        left: 0,
+        right: 0,
+        child: Column(
           mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      Dimens.leftMargin, 0, Dimens.rightMargin, 0),
-                  child: Image.asset(
-                    'img/reader_toolbar_top_back.png',
-                    width: 30,
-                    height: Dimens.titleHeight,
-                    color: MyColors.contentColor,
-                  ),
-                ),
-              ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).padding.top,
             ),
-            Expanded(child: SizedBox()),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {},
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  child: Image.asset(
-                    'img/icon_bookshelf_more.png',
-                    width: 3.0,
-                    height: Dimens.titleHeight,
-                    color: MyColors.contentColor,
+            Container(
+              height: Dimens.titleHeight,
+              color: MyColors.contentBgColor,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    height: MediaQuery.of(context).padding.top,
                   ),
-                ),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                            Dimens.leftMargin, 0, Dimens.rightMargin, 0),
+                        child: Image.asset(
+                          'img/reader_toolbar_top_back.png',
+                          width: 30,
+                          height: Dimens.titleHeight,
+                          color: MyColors.contentColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(child: SizedBox()),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {},
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                        child: Image.asset(
+                          'img/icon_bookshelf_more.png',
+                          width: 3.0,
+                          height: Dimens.titleHeight,
+                          color: MyColors.contentColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget settingView() {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: MediaQuery.of(context).padding.top,
-        ),
-        buildReadTopView(),
-        Expanded(child: SizedBox()),
-        buildReadBottomView(),
-      ],
-    );
-  }
-
-  Widget posWid() {
-    return Positioned(
-        bottom: 100 * animation.value,
-        child: Container(color: Colors.red, child: FlutterLogo()));
-  }
-
-  buildTopView(BuildContext context) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: Screen.navigationBarHeight,
-        padding: EdgeInsets.fromLTRB(5, Screen.topSafeHeight, 5, 0),
-        child: Row(
-          children: <Widget>[
-            Container(
-              width: 44,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Image.asset('img/icon_bookshelf_more.png'),
-              ),
-            ),
-            Expanded(child: Container()),
-            Container(
-              width: 44,
-              child: Image.asset('img/icon_bookshelf_more.png'),
-            ),
-            Container(
-              width: 44,
-              child: Image.asset('img/icon_bookshelf_more.png'),
-            ),
-          ],
-        ),
-      ),
-    );
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-          tooltip: 'Animation',
-          child: new Icon(Icons.lightbulb_outline),
-          onPressed: () {
-            isForward
-                ? animationController.reverse()
-                : animationController.forward();
-            isForward = !isForward;
-          }),
       body: AnnotatedRegion(
-          value: SystemUiOverlayStyle.dark,
-          child: Stack(
-            children: [
-              GestureDetector(
-                onTapDown: (_) {
-                  hide();
-                  print('object');
-                },
-                child: Container(color: Colors.transparent),
-              ),
-//              buildTopView(context),
-//              buildBottomView(),
-              posWid(),
-//              AnimationPage03(),
-            ],
-          )),
+        value:
+            SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]),
+        child: GestureDetector(
+            onTap: () {
+              print('object;');
+              isForward
+                  ? animationController.reverse()
+                  : animationController.forward();
+              isForward = !isForward;
+            },
+            child: Stack(
+              children: [
+                Positioned(
+                    left: 0,
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Image.asset('img/read_bg.png', fit: BoxFit.cover)),
+                buildPageView(),
+                buildReadTopView(),
+                buildBottomView(),
+              ],
+            )),
+      ),
     );
   }
 }
