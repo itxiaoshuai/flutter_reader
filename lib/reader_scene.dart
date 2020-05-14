@@ -1,6 +1,8 @@
 import 'package:epub/epub.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html/style.dart';
 import 'package:flutterreader/manager/resource_mananger.dart';
 import 'package:flutterreader/res/colors.dart';
 import 'package:flutterreader/res/dimens.dart';
@@ -52,12 +54,31 @@ class ReaderSceneState extends State<ReaderScene>
     super.dispose();
   }
 
+  Widget html = Html(
+    data: epubBook.Chapters[3].SubChapters[0].HtmlContent,
+    //Optional parameters:
+    onLinkTap: (url) {
+      // open url in a webview
+    },
+    style: {},
+    onImageTap: (src) {
+      // Display the image in large form.
+    },
+  );
   Widget buildPage(BuildContext context, int index) {
     return GestureDetector(
         child: Container(
-      child: Center(
-        child: Text(index.toString()),
-      ),
+      child: html,
+//      child: Center(
+//        child: Text.rich(
+//          TextSpan(children: [
+//            TextSpan(
+//                text: epubBook.Chapters[1].HtmlContent,
+//                style: TextStyle(fontSize: fixedFontSize(20)))
+//          ]),
+//          textAlign: TextAlign.justify,
+//        ),
+//      ),
     ));
   }
 

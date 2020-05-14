@@ -2,8 +2,9 @@ import 'dart:typed_data';
 import 'package:epub/epub.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutterreader/app_navigator.dart';
+import 'package:flutterreader/read/reader_scene.dart';
 
 void main() => runApp(App());
 
@@ -25,26 +26,28 @@ EpubBook epubBook;
 
 class _HomePageState extends State<HomePage> {
   static Future<bool> fetch() async {
-    ByteData imageData = await rootBundle.load('assets/test.epub');
-    List<int> bytes = Uint8List.view(imageData.buffer);
-
-    epubBook = await EpubReader.readBook(bytes);
-    String title = epubBook.Title;
-    String author = epubBook.Author;
-    List<String> authors = epubBook.AuthorList;
-
-    epubBook.Chapters.forEach((EpubChapter chapter) {
-      // Title of chapter
-      String chapterTitle = chapter.Title;
-
-      // HTML content of current chapter
-      String chapterHtmlContent = chapter.HtmlContent;
-//      print(chapterHtmlContent);
-      // Nested chapters
-      List<EpubChapter> subChapters = chapter.SubChapters;
-    });
-    EpubContent bookContent = epubBook.Content;
-//    print(title);
+//    ByteData imageData = await rootBundle.load('assets/test.epub');
+//    ByteData imageData = await rootBundle.load('assets/hhh.txt');
+//    List<int> bytes = Uint8List.view(imageData.buffer);
+    var a = await rootBundle.loadString('assets/hhh.txt');
+    print(a);
+//    epubBook = await EpubReader.readBook(bytes);
+//    print(epubBook.Content.Fonts);
+//    print(epubBook.Content.Html);
+//    String title = epubBook.Title;
+//    String author = epubBook.Author;
+//    List<String> authors = epubBook.AuthorList;
+//
+//    epubBook.Chapters.forEach((EpubChapter chapter) {
+//
+//      String chapterTitle = chapter.Title;
+//
+//
+//      String chapterHtmlContent = chapter.HtmlContent;
+//
+//      List<EpubChapter> subChapters = chapter.SubChapters;
+//    });
+//    EpubContent bookContent = epubBook.Content;
 
     return true;
   }
@@ -53,34 +56,36 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Center(
-        child: GestureDetector(
-          onTap: () async {
-            Future f1 = Future(() => fetch());
+      body: Column(
+        children: [
+          GestureDetector(
+            onTap: () async {
+              Future f1 = Future(() => fetch());
 
-            f1.then((_) => AppNavigator.pushReader(context, epubBook));
-            // f2 then 异步回调里面还有异步回调
-          },
-          child: Container(
-            child: Column(
-              children: [
-                Text(epubBook == null ? "" : epubBook.Title),
-                Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                      color: Color(0xFF23B38E),
-                      borderRadius: BorderRadius.circular(5)),
-                  child: Center(
-                    child: Text(
-                      '开始阅读',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
+              f1.then((_) => AppNavigator.pushReader(context, epubBook));
+              // f2 then 异步回调里面还有异步回调
+            },
+            child: Container(
+              child: Column(
+                children: [
+                  Text(epubBook == null ? "" : epubBook.Title),
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Color(0xFF23B38E),
+                        borderRadius: BorderRadius.circular(5)),
+                    child: Center(
+                      child: Text(
+                        '开始阅读',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
