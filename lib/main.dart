@@ -55,15 +55,12 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(),
       body: Center(
         child: GestureDetector(
-          onTap: () {
-            AppNavigator.pushReader(context, 1);
+          onTap: () async {
+            Future f1 = Future(() => fetch());
+
+            f1.then((_) => AppNavigator.pushReader(context, epubBook));
+            // f2 then 异步回调里面还有异步回调
           },
-//          onTap: () async {
-//            Future f1 = Future(() => fetch());
-//
-//            f1.then((_) => setState(() {}));
-//            // f2 then 异步回调里面还有异步回调
-//          },
           child: Container(
             child: Column(
               children: [

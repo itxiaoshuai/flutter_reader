@@ -1,3 +1,4 @@
+import 'package:epub/epub.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterreader/reader_scene.dart';
 
@@ -11,9 +12,9 @@ class AppNavigator {
     );
   }
 
-  static pushReader(BuildContext context, int articleId) {
+  static pushReader(BuildContext context, EpubBook epubBook) {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return ReaderScene(articleId: articleId);
+      return ReaderScene(epubBook: epubBook);
     }));
   }
 }

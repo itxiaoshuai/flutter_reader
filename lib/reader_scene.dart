@@ -1,3 +1,4 @@
+import 'package:epub/epub.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutterreader/manager/resource_mananger.dart';
@@ -6,15 +7,16 @@ import 'package:flutterreader/res/dimens.dart';
 import 'package:flutterreader/utils/screen.dart';
 import 'package:flutterreader/utils/utility.dart';
 import 'package:flutterreader/res/img.dart';
-
+import 'package:flutter/src/widgets/image.dart' deferred as img;
+import 'main.dart';
 import 'res/gaps.dart';
 
 enum PageJumpType { stay, firstPage, lastPage }
 
 class ReaderScene extends StatefulWidget {
-  final int articleId;
+  final EpubBook epubBook;
 
-  ReaderScene({this.articleId});
+  ReaderScene({this.epubBook});
 
   @override
   ReaderSceneState createState() => ReaderSceneState();
@@ -61,6 +63,7 @@ class ReaderSceneState extends State<ReaderScene>
 
   buildPageView() {
     int itemCount = 10;
+
     return PageView.builder(
       physics: BouncingScrollPhysics(),
       controller: pageController,
@@ -121,7 +124,7 @@ class ReaderSceneState extends State<ReaderScene>
             padding: EdgeInsets.symmetric(vertical: 7),
             child: Column(
               children: <Widget>[
-                Image.asset(
+                img.Image.asset(
                   ImageHelper.wrapAssets(icon),
                   color: MyColors.white,
                 ),
@@ -168,7 +171,7 @@ class ReaderSceneState extends State<ReaderScene>
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                             Dimens.leftMargin, 0, Dimens.rightMargin, 0),
-                        child: Image.asset(
+                        child: img.Image.asset(
                           ImageHelper.wrapAssets(ConstImgResource.back),
                           width: 30,
                           height: Dimens.titleHeight,
@@ -184,7 +187,7 @@ class ReaderSceneState extends State<ReaderScene>
                       onTap: () {},
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                        child: Image.asset(
+                        child: img.Image.asset(
                           ImageHelper.wrapAssets(ConstImgResource.more),
                           width: 3.0,
                           height: Dimens.titleHeight,
@@ -204,10 +207,9 @@ class ReaderSceneState extends State<ReaderScene>
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: Drawer(child: ReadDrawer()),
+      drawer: Drawer(child: ReadDrawer(epubBook)),
       body: AnnotatedRegion(
-        value:
-            SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]),
+        value: SystemChrome.setEnabledSystemUIOverlays([]),
         child: GestureDetector(
             onTap: () {
               isForward
@@ -222,7 +224,7 @@ class ReaderSceneState extends State<ReaderScene>
                     top: 0,
                     right: 0,
                     bottom: 0,
-                    child: Image.asset(
+                    child: img.Image.asset(
                         ImageHelper.wrapAssets(ConstImgResource.readBg),
                         fit: BoxFit.cover)),
                 buildPageView(),
@@ -260,7 +262,11 @@ Widget buildTwoRow() {
         flex: 1,
         child: Container(
           height: 50,
-          child: ListRowItem(image: ConstImgResource.notes, text: "笔记"),
+          child: ListRowItem(
+            image: ConstImgResource.notes,
+            text: "笔记",
+            colors: Colors.yellow,
+          ),
         ),
       ),
     ],
@@ -270,8 +276,9 @@ Widget buildTwoRow() {
 class ListRowItem extends StatelessWidget {
   final String text;
   final String image;
+  final MaterialColor colors;
 
-  ListRowItem({this.image, this.text});
+  ListRowItem({this.image, this.text, this.colors});
 
   @override
   Widget build(BuildContext context) {
@@ -279,16 +286,13 @@ class ListRowItem extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Image.asset(
+          img.Image.asset(
             ImageHelper.wrapAssets(image),
             width: 20,
           ),
           Gaps.hGap4,
           Container(
-              child: Text(text,
-                  style: TextStyle(
-                    fontSize: 16,
-                  )))
+              child: Text(text, style: TextStyle(fontSize: 16, color: colors)))
         ],
       ),
     );
@@ -296,89 +300,229 @@ class ListRowItem extends StatelessWidget {
 }
 
 class ReadDrawer extends StatefulWidget {
+  ReadDrawer(EpubBook epubBook, {Key key}) : super(key: key);
+
   @override
   _ReadDrawerState createState() => _ReadDrawerState();
 }
 
-class _ReadDrawerState extends State<ReadDrawer>
-    with SingleTickerProviderStateMixin {
-  TabController controller; //tab控制器
-  int _currentIndex = 0; //选中下标
+class _ReadDrawerState extends State<ReadDrawer> {
+  /// 初始化控制器
+  PageController pageController;
+  int _selectedIndex = 0;
+
   @override
   void initState() {
     super.initState();
-    //初始化controller并添加监听
-    controller = TabController(length: 3, vsync: this);
-    controller.addListener(() => _onTabChanged());
-  }
-
-  ///
-  /// tab改变监听
-  ///
-  _onTabChanged() {
-    if (controller.index.toDouble() == controller.animation.value) {
-      //赋值 并更新数据
-      this.setState(() {
-        _currentIndex = controller.index;
+    epubBook.Chapters.forEach((EpubChapter chapter) {
+      // Title of chapter
+      String chapterTitle = chapter.Title;
+      print(chapterTitle);
+      // HTML content of current chapter
+      String chapterHtmlContent = chapter.HtmlContent;
+//      print(chapterHtmlContent);
+      // Nested chapters
+      List<EpubChapter> subChapters = chapter.SubChapters;
+      subChapters.forEach((EpubChapter epubChapter) {
+        String chapterTitle = epubChapter.Title;
+        print(chapterTitle);
       });
-    }
+    });
+
+    ///创建控制器的实例
+    pageController = new PageController(
+      ///用来配置PageView中默认显示的页面 从0开始
+      initialPage: _selectedIndex,
+
+      ///为true是保持加载的每个页面的状态
+      keepPage: true,
+    );
+
+    ///PageView设置滑动监听
+    pageController.addListener(() {
+      //PageView滑动的距离
+      double offset = pageController.offset;
+      print("pageView 滑动的距离 $offset");
+    });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    controller.dispose();
+  Widget buildTwoRow() {
+    return Row(
+      //水平方向填充
+      mainAxisSize: MainAxisSize.max,
+      //平分空白
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Expanded(
+          flex: 1,
+          child: Material(
+            child: InkWell(
+              onTap: () {
+                pageController.animateToPage(0,
+                    duration: Duration(milliseconds: 200),
+                    curve: Curves.linear);
+              },
+              child: Container(
+                height: 50,
+                child: ListRowItem(
+                  image: _selectedIndex == 0
+                      ? ConstImgResource.dwnPressed
+                      : ConstImgResource.dwn,
+                  text: "目录",
+                  colors: _selectedIndex == 0 ? Colors.blue : Colors.grey,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Material(
+            child: InkWell(
+              onTap: () {
+                pageController.animateToPage(1,
+                    duration: Duration(milliseconds: 200),
+                    curve: Curves.linear);
+              },
+              child: Container(
+                height: 50,
+                child: ListRowItem(
+                  image: _selectedIndex == 1
+                      ? ConstImgResource.bookmarkPressed
+                      : ConstImgResource.bookmark,
+                  text: "书签",
+                  colors: _selectedIndex == 1 ? Colors.blue : Colors.grey,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+            flex: 1,
+            child: Material(
+              child: InkWell(
+                onTap: () {
+                  pageController.animateToPage(2,
+                      duration: Duration(milliseconds: 200),
+                      curve: Curves.linear);
+                },
+                child: Container(
+                  height: 50,
+                  child: ListRowItem(
+                    image: _selectedIndex == 2
+                        ? ConstImgResource.notesPressed
+                        : ConstImgResource.notes,
+                    text: "笔记",
+                    colors: _selectedIndex == 2 ? Colors.blue : Colors.grey,
+                  ),
+                ),
+              ),
+            )),
+      ],
+    );
+  }
+
+  Widget buildListData(
+    BuildContext context,
+    EpubChapter epubChapter,
+  ) {
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.only(left: 10),
+          height: 48,
+          child: Row(
+            children: [
+              Text(
+                epubChapter.Title,
+                style: TextStyle(fontSize: 18),
+              )
+            ],
+          ),
+        ),
+        ListView.builder(
+          itemCount: epubChapter.SubChapters.length,
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            return Column(
+              children: [
+                Gaps.line,
+                Container(
+                  padding: EdgeInsets.only(left: 25),
+                  height: 48,
+                  child: Row(
+                    children: [
+                      Text(
+                        epubChapter.SubChapters[index].Title,
+                        style: TextStyle(fontSize: 18),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget pageOne() {
+    return Container(
+      child: ListView.separated(
+          itemBuilder: (context, item) {
+            return buildListData(context, epubBook.Chapters[item]);
+          },
+          separatorBuilder: (BuildContext context, int index) => Divider(
+                color: Colors.black,
+                height: 0,
+              ),
+          itemCount: epubBook.Chapters.length),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      //DefaultTabController
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-            backgroundColor: Colors.white,
-            automaticallyImplyLeading: false,
-            title: TabBar(
-              controller: TabController(length: 3, vsync: this)
-                ..addListener(() {
-                  print('xx');
-                }),
-              labelColor: Colors.blue,
-              unselectedLabelColor: Colors.grey,
-              tabs: <Widget>[
-                Tab(
-                    icon: Icon(
-                      Icons.directions_car,
-                    ),
-                    text: "目录"),
-                Tab(icon: Icon(Icons.directions_transit), text: "书签"),
-                Tab(icon: Icon(Icons.directions_bike), text: "笔记"),
-//                Tab(
-//                  child: ListRowItem(image: ConstImgResource.dwn, text: "目录"),
-//                ),
-//                Tab(
-//                  child:
-//                      ListRowItem(image: ConstImgResource.bookmark, text: "书签"),
-//                ),
-//                Tab(
-//                  child: ListRowItem(image: ConstImgResource.notes, text: "笔记"),
-//                ),
-              ],
-            )),
-        body: TabBarView(
-          children: <Widget>[
-            Container(
-              child: Text('xxx'), //TabCar对应tab_car.dart的Class name
-            ),
-            Container(
-              child: Text('xxx'),
-            ),
-            Container(
-              child: Text('xxx'),
-            ),
-          ],
-        ),
+    return Scaffold(
+      body: Stack(
+        children: [
+          PageView(
+            controller: pageController,
+            scrollDirection: Axis.horizontal,
+            reverse: false,
+            physics: BouncingScrollPhysics(),
+            pageSnapping: true,
+            onPageChanged: (index) {
+              _selectedIndex = index;
+              //监听事件
+              print('index=====$index');
+              setState(() {});
+            },
+            children: <Widget>[
+              pageOne(),
+              Container(
+                margin: EdgeInsets.only(top: 50),
+                child: Center(
+                  child: Text(
+                    '第2页',
+                    style: TextStyle(color: Colors.black, fontSize: 20.0),
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 50),
+                child: Center(
+                  child: Text(
+                    '第3页',
+                    style: TextStyle(color: Colors.black, fontSize: 20.0),
+                  ),
+                ),
+              )
+            ],
+          ),
+          buildTwoRow(),
+        ],
       ),
     );
   }

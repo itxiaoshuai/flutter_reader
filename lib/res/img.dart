@@ -12,6 +12,6 @@ class ConstImgResource {
   static String dwn = 'reader_dwn_dir.png'; //更多
   static String dwnPressed = 'reader_dwn_dir_pressed.png'; //更多
   static String notes = 'reader_dwn_notes.png'; //笔记
-  static String notesPressed = ' reader_dwn_notes_pressed.png'; //笔记pressed
+  static String notesPressed = 'reader_dwn_notes_pressed.png'; //笔记pressed
 
 }
