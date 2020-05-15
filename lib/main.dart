@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutterreader/app_navigator.dart';
+import 'package:flutterreader/page_news.dart';
 import 'package:flutterreader/read/reader_scene.dart';
 
 void main() => runApp(App());
@@ -12,7 +13,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: HomePage(),
+      home: NewsPage(),
     );
   }
 }

@@ -32,6 +32,11 @@ dependencies:
   path_provider: ^1.6.8
   flutter_html: ^1.0.0-pre.1
   epub_view: ^0.8.0
+  dio: ^3.0.9
+  oktoast: ^2.3.2
+  provider: ^4.1.2
+  pull_to_refresh: ^1.5.8
+  dio_cookie_manager: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
