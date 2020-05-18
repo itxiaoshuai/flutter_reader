@@ -40,14 +40,12 @@ class HttpUtil {
 //    dio.interceptors.add(CookieManager(CookieJar()));
   }
 
-  get(url, {data, options, cancelToken}) async {
-    print('get请求启动! url：$url ,body: $data');
+  get(url, {queryParameters, options, cancelToken}) async {
+    print('get请求启动! url：$url ,body: $queryParameters');
     Response response;
     try {
-      response = await dio.get(
-        url,
-        cancelToken: cancelToken,
-      );
+      response = await dio.get(url,
+          cancelToken: cancelToken, queryParameters: queryParameters);
       print('get请求成功!response.data：${response.data}');
     } on DioError catch (e) {
       if (CancelToken.isCancel(e)) {

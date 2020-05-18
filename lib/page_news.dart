@@ -6,7 +6,9 @@ import 'package:flutterreader/manager/request_manager.dart';
 import 'package:flutterreader/provider/provider_widget.dart';
 import 'package:flutterreader/provider/view_state_widget.dart';
 import 'base/api.dart';
+import 'category_page.dart';
 import 'generated/i18n.dart';
+import 'manager/router_manger.dart';
 import 'model/category_model.dart';
 import 'model/news_model.dart';
 import 'net/http_utils.dart';
@@ -72,11 +74,20 @@ class GridViewCustomDemo extends StatelessWidget {
             crossAxisCount: 2, mainAxisSpacing: 10, crossAxisSpacing: 10),
         childrenDelegate: SliverChildListDelegate(
           List.generate(category.male.length, (index) {
-            return Image.network(
-              Api.IMG_BASE_URL + category.male[index].bookCover[0],
-              fit: BoxFit.cover,
-              colorBlendMode: BlendMode.colorBurn,
-              color: Colors.white10,
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CategoryPage('male', '玄幻')),
+                );
+              },
+              child: Image.network(
+                Api.IMG_BASE_URL + category.male[index].bookCover[0],
+                fit: BoxFit.cover,
+                colorBlendMode: BlendMode.colorBurn,
+                color: Colors.white10,
+              ),
             );
           }),
         ),
