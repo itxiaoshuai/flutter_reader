@@ -54,6 +54,7 @@ class _NewsPageState extends State<NewsPage> {
   Future<void> init() async {
     var jsonString = await httpUtil.get(Api.category);
     category = Category.fromMap(json.decode(jsonString));
+    setState(() {});
     print(category);
   }
 }

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutterreader/app_navigator.dart';
+import 'package:flutterreader/page/page_book_list.dart';
 import 'package:flutterreader/page_news.dart';
 import 'package:flutterreader/read/reader_scene.dart';
+import 'package:flutterreader/res/gaps.dart';
 
 void main() => runApp(App());
 
@@ -13,7 +15,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: NewsPage(),
+      home: HomePage(),
     );
   }
 }
@@ -78,6 +80,33 @@ class _HomePageState extends State<HomePage> {
                     child: Center(
                       child: Text(
                         '开始阅读',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+          Gaps.vGap14,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => BookListPage()),
+              );
+            },
+            child: Container(
+              child: Column(
+                children: [
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Color(0xFF23B38E),
+                        borderRadius: BorderRadius.circular(5)),
+                    child: Center(
+                      child: Text(
+                        '书籍列表',
                         style: TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),
