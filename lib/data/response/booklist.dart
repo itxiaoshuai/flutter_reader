@@ -24,7 +24,7 @@ class BookList extends Base {
 }
 
 class Book {
-  String _id;
+  String bookId;
   String title;
   String author;
   String shortIntro;
@@ -37,7 +37,7 @@ class Book {
   static Book fromMap(Map<String, dynamic> map) {
     if (map == null) return null;
     Book book = Book();
-    book._id = map['_id'];
+    book.bookId = map['_id'];
     book.title = map['title'];
     book.author = map['author'];
     book.shortIntro = map['shortIntro'];
@@ -47,7 +47,7 @@ class Book {
   }
 
   Map toJson() => {
-        "_id": _id,
+        "_id": bookId,
         "title": title,
         "author": author,
         "shortIntro": shortIntro,

@@ -8,6 +8,7 @@ import 'package:flutterreader/base/api.dart';
 import 'package:flutterreader/data/response/booklist.dart';
 import 'package:flutterreader/entity/category.dart';
 import 'package:flutterreader/net/http_utils.dart';
+import 'package:flutterreader/read/page_reader.dart';
 import 'package:flutterreader/res/gaps.dart';
 
 import '../category_page.dart';
@@ -39,10 +40,19 @@ class _BookListPageState extends State<BookListPage> {
           itemCount: _list.length,
           itemBuilder: (BuildContext context, int index) {
             Book item = _list[index];
+
             return Material(
 //                        color: Colors.red,
               child: InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ReaderPage(
+                              bookId: item.bookId,
+                            )),
+                  );
+                },
                 child: NewsItemLeft(item),
               ),
             );
@@ -120,7 +130,7 @@ _leftOrRightWidget(BuildContext context, Book book) {
                   alignment: FractionalOffset.centerLeft,
                   child: Text(
                     book.title,
-                    style: Theme.of(context).textTheme.title,
+                    style: Theme.of(context).textTheme.subtitle1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
