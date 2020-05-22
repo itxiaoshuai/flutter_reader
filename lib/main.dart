@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutterreader/app_navigator.dart';
 import 'package:flutterreader/page/page_book_list.dart';
 import 'package:flutterreader/page_news.dart';
+import 'package:flutterreader/page_search.dart';
 import 'package:flutterreader/read/reader_scene.dart';
 import 'package:flutterreader/res/gaps.dart';
 
@@ -107,6 +108,33 @@ class _HomePageState extends State<HomePage> {
                     child: Center(
                       child: Text(
                         '书籍列表',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+          Gaps.vGap14,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SearchPage()),
+              );
+            },
+            child: Container(
+              child: Column(
+                children: [
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Color(0xFF23B38E),
+                        borderRadius: BorderRadius.circular(5)),
+                    child: Center(
+                      child: Text(
+                        '书籍搜索',
                         style: TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),

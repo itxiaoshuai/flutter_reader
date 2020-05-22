@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutterreader/base/base_constants.dart';
 import 'package:flutterreader/generated/i18n.dart';
 import 'package:flutterreader/manager/resource_mananger.dart';
+import 'package:flutterreader/res/img.dart';
 import 'view_state.dart';
 
 /// 加载中
@@ -198,7 +199,7 @@ class ViewStateUnAuthImage extends StatelessWidget {
       tag: 'loginLogo',
       child: Image.asset(
         ImageHelper.wrapAssets(
-          ConstImgResource.login,
+          ConstImgResource.catalog,
         ),
         width: 130,
         height: 100,

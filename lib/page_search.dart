@@ -1,32 +1,26 @@
 import 'dart:convert';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterreader/base/api.dart';
-import 'package:flutterreader/data/response/booklist.dart';
-import 'package:flutterreader/entity/category.dart';
-import 'package:flutterreader/net/http_utils.dart';
+import 'package:flutterreader/data/response/book_detail.dart';
+import 'package:flutterreader/read/book_detail.dart';
 import 'package:flutterreader/read/page_reader.dart';
 import 'package:flutterreader/res/gaps.dart';
-
-import '../category_page.dart';
+import 'data/response/search_book_list.dart';
 
 double circular = 6;
 
-class BookListPage extends StatefulWidget {
+class SearchPage extends StatefulWidget {
   @override
-  _BookListPageState createState() => _BookListPageState();
+  _SearchPageState createState() => _SearchPageState();
 }
 
-class _BookListPageState extends State<BookListPage> {
+class _SearchPageState extends State<SearchPage> {
   List<Book> _list = [];
 
   @override
   void initState() {
     super.initState();
-
     init();
   }
 
@@ -49,8 +43,8 @@ class _BookListPageState extends State<BookListPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ReaderPage(
-                              url: item.bookId,
+                        builder: (context) => BookDetailPage(
+                              url: item.url,
                             )),
                   );
                 },
@@ -64,10 +58,11 @@ class _BookListPageState extends State<BookListPage> {
   init() async {
     Response response;
     Dio dio = Dio();
-    response = await dio.get("https://novel.juhe.im/books");
-    BookList bookList = BookList.fromMap(response.data);
+    response = await dio.get("http://api.pingcc.cn/?xsname=灵气逼人");
+    SearchBookList bookList =
+        SearchBookList.fromMap(json.decode(response.data));
     setState(() {
-      _list = bookList.books;
+      _list = bookList.list;
     });
 //    print(category);
   }
@@ -115,8 +110,8 @@ _leftOrRightWidget(BuildContext context, Book book) {
                 child: Align(
                   alignment: FractionalOffset.centerLeft,
                   child: Text(
-                    book.shortIntro,
-                    style: Theme.of(context).textTheme.subtitle,
+                    book.introduce == null ? "" : book.introduce,
+                    style: Theme.of(context).textTheme.subtitle1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -130,7 +125,7 @@ _leftOrRightWidget(BuildContext context, Book book) {
                 child: Align(
                   alignment: FractionalOffset.centerLeft,
                   child: Text(
-                    book.title,
+                    book.name,
                     style: Theme.of(context).textTheme.subtitle1,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -152,7 +147,7 @@ _imageWidget(BuildContext context, Book book) {
     height: 85,
     child: ClipRRect(
       borderRadius: BorderRadius.circular(circular),
-      child: Image.network(book.cover),
+      child: book.cover == null ? Image.network('') : Image.network(book.cover),
     ),
   );
 
