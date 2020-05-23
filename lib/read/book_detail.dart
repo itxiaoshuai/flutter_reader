@@ -17,7 +17,7 @@ class BookDetailPage extends StatefulWidget {
 }
 
 class _BookDetailPageState extends State<BookDetailPage> {
-  List<ChapterList> _list = [];
+  List<Chapter> _list = [];
 
   @override
   void initState() {
@@ -42,7 +42,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => ReaderPage(
-                                  url: _list[index].url,
+                                  chapters: _list,
+                                  chapterIndex: index,
                                 )),
                       );
                     },

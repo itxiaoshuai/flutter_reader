@@ -19,6 +19,7 @@ class ReaderPageAgent {
         break;
       }
       tempStr = tempStr.substring(end, tempStr.length);
+//      print(tempStr);
       offset['end'] = last + end;
       last = last + end;
       pageConfig.add(offset);

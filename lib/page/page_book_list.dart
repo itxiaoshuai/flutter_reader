@@ -46,13 +46,13 @@ class _BookListPageState extends State<BookListPage> {
 //                        color: Colors.red,
               child: InkWell(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ReaderPage(
-                              url: item.bookId,
-                            )),
-                  );
+//                  Navigator.push(
+//                    context,
+//                    MaterialPageRoute(
+//                        builder: (context) => ReaderPage(
+//                              url: item.bookId,
+//                            )),
+//                  );
                 },
                 child: NewsItemLeft(item),
               ),
