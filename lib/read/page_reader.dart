@@ -179,7 +179,10 @@ class ReaderPageState extends State<ReaderPage> {
       stringContent = stringContent + '　　' + item + '\n';
     });
     print('stringContent$stringContent');
-    article.stringContent = stringContent;
+    article.stringContent = stringContent.substring(
+      0,
+      stringContent.length - 1,
+    );
     article.pageOffsets = ReaderPageAgent.getPageOffsets(article.stringContent,
         contentHeight, contentWidth, ReaderConfig.instance.fontSize);
 //    print(article.pageOffsets);
