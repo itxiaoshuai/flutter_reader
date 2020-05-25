@@ -363,7 +363,6 @@ class _ReadDrawerState extends State<ReadDrawer> {
     pageController.addListener(() {
       //PageView滑动的距离
       double offset = pageController.offset;
-      print("pageView 滑动的距离 $offset");
     });
   }
 

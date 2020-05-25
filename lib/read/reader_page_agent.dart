@@ -14,12 +14,10 @@ class ReaderPageAgent {
           TextSpan(text: tempStr, style: TextStyle(fontSize: fontSize));
       textPainter.layout(maxWidth: width);
       var end = textPainter.getPositionForOffset(Offset(width, height)).offset;
-      print('end====$end');
       if (end == 0) {
         break;
       }
       tempStr = tempStr.substring(end, tempStr.length);
-//      print(tempStr);
       offset['end'] = last + end;
       last = last + end;
       pageConfig.add(offset);

@@ -16,6 +16,7 @@ import 'package:flutter/src/widgets/image.dart' deferred as img;
 import 'package:flutterreader/res/img.dart';
 import 'package:flutterreader/utils/screen.dart';
 import 'package:flutterreader/utils/utility.dart';
+import 'package:oktoast/oktoast.dart';
 
 enum PageJumpType { stay, firstPage, lastPage }
 
@@ -33,64 +34,87 @@ class ReaderPage extends StatefulWidget {
 }
 
 class ReaderPageState extends State<ReaderPage> {
-  PageController pageController = PageController(keepPage: false);
   double topSafeHeight = 0;
   Article preArticle; //前一章节
   Article currentArticle; //当前章节
   Article nextArticle; //下一章节
   int pageIndex = 0;
+  int currentChapterIndex = 0;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-
-    ///PageView设置滑动监听
-    pageController.addListener(() {
-      //PageView滑动的距离
-      double offset = pageController.offset;
-      print("pageView 滑动的距离 $offset");
-    });
+    currentChapterIndex = widget.chapterIndex;
     setup();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AnnotatedRegion(
-        value: SystemChrome.setEnabledSystemUIOverlays([]),
-        child: GestureDetector(
-            onTap: () {},
-            child: Stack(
-              children: [
-                Positioned(
-                    left: 0,
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: img.Image.asset(
-                        ImageHelper.wrapAssets(ConstImgResource.readBg),
-                        fit: BoxFit.cover)),
-                buildPageView(),
-              ],
-            )),
+    return OKToast(
+      textStyle: TextStyle(fontSize: 19.0, color: Colors.white),
+      backgroundColor: Colors.grey,
+      radius: 10.0,
+      animationCurve: Curves.easeIn,
+      animationBuilder: Miui10AnimBuilder(),
+      animationDuration: Duration(milliseconds: 200),
+      duration: Duration(seconds: 3),
+      child: Scaffold(
+        body: AnnotatedRegion(
+          value: SystemChrome.setEnabledSystemUIOverlays([]),
+          child: GestureDetector(
+              onTap: () {},
+              child: Stack(
+                children: [
+                  Positioned(
+                      left: 0,
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: img.Image.asset(
+                          ImageHelper.wrapAssets(ConstImgResource.readBg),
+                          fit: BoxFit.cover)),
+                  buildPageView(),
+                ],
+              )),
+        ),
       ),
     );
   }
 
   Widget buildPage(BuildContext context, int index) {
-    var page = index - (preArticle != null ? preArticle.pageCount : 0);
+    print('index-------$index');
+    print(preArticle.pageCount);
+    print(currentArticle.pageCount);
+    print(nextArticle.pageCount);
     var article;
-    if (page >= this.currentArticle.pageCount) {
-      // 到达下一章了
-      article = nextArticle;
-      page = 0;
-    } else if (page < 0) {
-      // 到达上一章了
+    var page;
+    if (index < preArticle.pageCount) {
       article = preArticle;
-      page = preArticle.pageCount - 1;
-    } else {
-      article = this.currentArticle;
+      page = index;
+    } else if (index >= preArticle.pageCount &&
+        index < (preArticle.pageCount + currentArticle.pageCount)) {
+      article = currentArticle;
+      page = index - (preArticle != null ? preArticle.pageCount : 0);
+    } else if (index >= (preArticle.pageCount + currentArticle.pageCount)) {
+      article = nextArticle;
+      page = index -
+          ((preArticle != null ? preArticle.pageCount : 0) +
+              (currentArticle != null ? currentArticle.pageCount : 0));
     }
+
+//
+//    if (page >= this.currentArticle.pageCount) {
+//      // 到达下一章了
+//      article = nextArticle;
+//      page = 0;
+//    } else if (page < 0) {
+//      // 到达上一章了
+//      article = preArticle;
+//      page = preArticle.pageCount - 1;
+//    } else {
+//      article = this.currentArticle;
+//    }
 
     return GestureDetector(
       onTapUp: (TapUpDetails details) {
@@ -101,6 +125,23 @@ class ReaderPageState extends State<ReaderPage> {
     );
   }
 
+  onPageChanged(int index) {
+    showToast(
+      index.toString(),
+      duration: Duration(milliseconds: 3500),
+      position: ToastPosition.center,
+      backgroundColor: Colors.black.withOpacity(0.8),
+      radius: 3.0,
+      textStyle: TextStyle(fontSize: 30.0),
+    );
+    var page = index - (preArticle != null ? preArticle.pageCount : 0);
+    if (page < currentArticle.pageCount && page >= 0) {
+      setState(() {
+        pageIndex = page;
+      });
+    }
+  }
+
   buildPageView() {
     if (currentArticle == null) {
       return Container();
@@ -108,21 +149,22 @@ class ReaderPageState extends State<ReaderPage> {
     int itemCount = (preArticle != null ? preArticle.pageCount : 0) +
         currentArticle.pageCount +
         (nextArticle != null ? nextArticle.pageCount : 0);
-
+    print('itemCount---->$itemCount');
     return PageView.builder(
       physics: BouncingScrollPhysics(),
-      controller: pageController,
+      controller: PageController(
+          initialPage: preArticle != null ? preArticle.pageCount : 0)
+        ..addListener(onScroll),
       itemCount: itemCount,
       itemBuilder: buildPage,
-      onPageChanged: (index) {
-        print(index);
-      },
+      onPageChanged: onPageChanged,
     );
   }
 
   Future<Article> fetchArticle(String articleId) async {
     Response response;
     Dio dio = Dio();
+    print('http://api.pingcc.cn/?xsurl2=' + articleId);
     response = await dio.get('http://api.pingcc.cn/?xsurl2=' + articleId);
     Article article = Article.fromMap(jsonDecode(response.data));
     var contentHeight = Screen.height -
@@ -137,11 +179,11 @@ class ReaderPageState extends State<ReaderPage> {
       stringContent = stringContent + '　　' + item + '\n';
     });
     print('stringContent$stringContent');
-    article.chapterName = this.widget.chapters[this.widget.chapterIndex].num;
     article.stringContent = stringContent;
     article.pageOffsets = ReaderPageAgent.getPageOffsets(article.stringContent,
         contentHeight, contentWidth, ReaderConfig.instance.fontSize);
-    print(article.pageOffsets);
+//    print(article.pageOffsets);
+    print(article.pageCount);
     return article;
   }
 
@@ -151,36 +193,101 @@ class ReaderPageState extends State<ReaderPage> {
     await Future.delayed(const Duration(milliseconds: 100), () {});
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     topSafeHeight = Screen.topSafeHeight;
-    await resetContent(
-        this.widget.chapters[this.widget.chapterIndex].url, PageJumpType.stay);
+    await resetContent(this.widget.chapters[this.widget.chapterIndex].url,
+        this.widget.chapterIndex, PageJumpType.stay);
   }
 
-  resetContent(String articleId, PageJumpType jumpType) async {
+  resetContent(
+      String articleId, int chapterIndex, PageJumpType jumpType) async {
+    print('  //获取当前章节');
     currentArticle = await fetchArticle(articleId);
     //获取前一章节
     if (this.widget.chapterIndex > 0) {
-      articleId = this.widget.chapters[this.widget.chapterIndex - 1].url;
+      print('  //获取前一章节');
+      articleId = this.widget.chapters[currentChapterIndex - 1].url;
       preArticle = await fetchArticle(articleId);
     } else {
       preArticle = null;
     }
     //获取下一章节
     if (this.widget.chapterIndex <= this.widget.chapters.length) {
-      articleId = this.widget.chapters[this.widget.chapterIndex + 1].url;
+      print('  //获取下一章节');
+      articleId = this.widget.chapters[currentChapterIndex + 1].url;
       nextArticle = await fetchArticle(articleId);
     } else {
       nextArticle = null;
     }
-    if (jumpType == PageJumpType.firstPage) {
-      pageIndex = 0;
-    } else if (jumpType == PageJumpType.lastPage) {
-      pageIndex = currentArticle.pageCount - 1;
-    }
-    if (jumpType != PageJumpType.stay) {
-      pageController.jumpToPage(
-          (preArticle != null ? preArticle.pageCount : 0) + pageIndex);
-    }
+//    if (jumpType == PageJumpType.firstPage) {
+//      pageIndex = 0;
+//    } else if (jumpType == PageJumpType.lastPage) {
+//      pageIndex = currentArticle.pageCount - 1;
+//    }
+//    if (jumpType != PageJumpType.stay) {
+//      pageController.jumpToPage(
+//          (preArticle != null ? preArticle.pageCount : 0) + pageIndex);
+//    }
 
+    setState(() {});
+  }
+
+  onScroll() {
+//    double offset = pageController.offset;
+//    print('pageController.offset$offset');
+//    var page = pageController.offset / Screen.width;
+//    print('page----------->$page');
+//    var nextArtilePage = currentArticle.pageCount +
+//        (preArticle != null ? preArticle.pageCount : 0);
+//
+//    if (page >= nextArtilePage) {
+//      currentChapterIndex = currentChapterIndex + 1;
+//      print('到达下个章节了---$currentChapterIndex');
+//      preArticle = currentArticle;
+//      currentArticle = nextArticle;
+//      nextArticle = null;
+//      pageIndex = 0;
+//      pageController.jumpToPage(preArticle.pageCount);
+//
+//      if (currentChapterIndex <= this.widget.chapters.length) {
+//        String articleId = this.widget.chapters[currentChapterIndex + 1].url;
+//        fetchNextArticle(articleId);
+//      }
+//
+//      setState(() {});
+//    }
+//    if (preArticle != null && page <= preArticle.pageCount - 1) {
+//      currentChapterIndex = currentChapterIndex - 1;
+//      print('到达上个章节了---$currentChapterIndex');
+//      nextArticle = currentArticle;
+//      currentArticle = preArticle;
+//      preArticle = null;
+//      pageIndex = currentArticle.pageCount - 1;
+//      pageController.jumpToPage(currentArticle.pageCount - 1);
+//      if (currentChapterIndex > 0) {
+//        String articleId = this.widget.chapters[currentChapterIndex].url;
+//        fetchPreviousArticle(articleId);
+//      }
+//
+//      setState(() {});
+//    }
+  }
+
+  Future<void> fetchNextArticle(articleId) async {
+    if (nextArticle != null || isLoading || articleId == 0) {
+      return;
+    }
+    isLoading = true;
+    nextArticle = await fetchArticle(articleId);
+    isLoading = false;
+    setState(() {});
+  }
+
+  Future<void> fetchPreviousArticle(articleId) async {
+    if (preArticle != null || isLoading || articleId == 0) {
+      return;
+    }
+    isLoading = true;
+    preArticle = await fetchArticle(articleId);
+    isLoading = false;
     setState(() {});
   }
 }

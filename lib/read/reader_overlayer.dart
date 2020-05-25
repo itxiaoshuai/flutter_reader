@@ -21,7 +21,7 @@ class ReaderOverlayer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(article.chapterName,
+          Text(article.num,
               style: TextStyle(
                   fontSize: fixedFontSize(14), color: MyColors.golden)),
           Expanded(child: Container()),
